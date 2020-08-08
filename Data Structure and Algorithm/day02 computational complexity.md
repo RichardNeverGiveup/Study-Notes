@@ -138,3 +138,5 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+Using this new Pylist append method, a sequence of n append operations takes O(n) time. This means individual operations must not take longer than O(1) time. But when the list run out of space a new list is created and all the old elements are copied to the new list, copying n elements takes longer than O(1) time. Technically, when the list size is doubled the complexity of append is O(n)  
+However, amortized complexity of append is O(1) since the cases the list needs to be doubled in not so often.

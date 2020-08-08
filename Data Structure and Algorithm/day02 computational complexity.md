@@ -86,7 +86,7 @@ So if we want to know the time it takes to append n elements to the PyList, we n
 First time we called append we had to copy one element of the list.The second time we copy two element....  
 1 + 2 + 3 + 4 + ... + n = n*(n+1)/2. So it's O(n2)  
 #### Q. How to improve?
-It more efficient if we didn鈥檛 have to access each element of the first list when
+It more efficient if we did not have to access each element of the first list when
 concatenating the two lists. The use of the + operator is what causes Python to
 access each element of that first list. When + is used a new list is created with space
 for one more element. Then all the elements from the old list must be copied to the
@@ -95,7 +95,7 @@ new list and the new element is added at the end of this list.
 ## 3. Commonly Occurring Computational Complexities
 O(1) < O(log n) < O(n log n) < O(n^2) < (c^n).  
 Function T(n) that is a description of the running time of an algorithm, where n is the size of the data given to the algorithm.  
-We want to study the asymptotic behavior = we want to study how T(n) increases as n鈫?鈭?.  
+We want to study the asymptotic behavior = we want to study how T(n) increases as n grows to infinite.  
 
 Omega notation $\Omega(g(n))$ serves as a way to describe a lower bound of a function.  
 With in the lower and upper bound, in some cases we can get the tight bound Theta notation $\Theta (g(n))$   

@@ -33,7 +33,7 @@ We'll keep track of the number of locations being used and the actual size of th
 We wouldn't have to keep track of the size of the list because we can use _len_ funciton. But we still did that,because we don't want to have a lot of _len_ to messy the code. 
 
 All the used locations in the internal list will occur at the beginning of the list. __Why don't we just put holes among the internal list?__   
-Storing all the items at the beginning of the list, without holes, also means that we can randomly access elements of the list in O(1) time. We don鈥檛 have to search for the proper location of an element. Indexing into the PyList will simply index into the internal items list to find the proper element as seen in the next sections.
+Storing all the items at the beginning of the list, without holes, also means that we can randomly access elements of the list in O(1) time. We do not have to search for the proper location of an element. Indexing into the PyList will simply index into the internal items list to find the proper element as seen in the next sections.
 
 
 ```python
@@ -64,7 +64,7 @@ or slice the elements.
 The complexity of creating a PyList object is O(1) if no value is passed to the constructor and O(n) if a sequence is passed to the constructor.
 
 ### Get and Set
-Our PyList class is a wrapper for the built-in list class. So, to implement the get item and set item operations on PyList, we鈥檒l use the get and set operations on the built-in list class. The code is given here. The complexity of both operations is O(1).
+Our PyList class is a wrapper for the built-in list class. So, to implement the get item and set item operations on PyList, we will use the get and set operations on the built-in list class. The code is given here. The complexity of both operations is O(1).
 
 
 ```python

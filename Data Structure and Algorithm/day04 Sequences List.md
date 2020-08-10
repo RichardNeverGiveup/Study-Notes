@@ -213,4 +213,4 @@ def __repr__(self):
     return s
 ```
 
-Python includes a function called eval that will take a string containing an expression and evaluate the expression in the string.  For instance, `eval(鈥?+5鈥?` results in 11 and `eval(鈥淸1,2,3]鈥漙) results in the `list [1,2,3]`. The `__repr__` method, if defined, should return a string representation of an object that is suitable to be given to the `eval` function.
+Python includes a function called eval that will take a string containing an expression and evaluate the expression in the string. The `__repr__` method, if defined, should return a string representation of an object that is suitable to be given to the `eval` function.

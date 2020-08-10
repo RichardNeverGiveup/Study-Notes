@@ -117,4 +117,24 @@ def revList2(lst):
 This example could be rewritten so the index grows toward the length of the list. In that case the distance between the index and the length of the list is the value that would get smaller on each recursive call.
 
 ## 4. Type Reflection
-Python has another very nice feature called reflection. Reflection refers to the ability for code to be able to examine attributes about objects that might be passed as parameters to a function.
+Python has another very nice feature called reflection. Reflection refers to the ability for code to be able to examine attributes about objects and the examined result might be used as a function or passed as parameters to a function.  
+Like `type(obj)` will return an object which represents the type of obj. we could use this property:  
+If obj is a reference to a string, python will return the __str type__ object. Further, we can write __str()__ to get an empty string. like this `type('a')()`.  
+Using reflection, we can write one recursive reverse function that will work for strings, lists, and __any other sequence that supports slicing and concatenation.__
+
+
+```python
+def reverse(seq):
+    SeqType = type(seq)
+    emptySeq = SeqType()
+    
+    if seq == emptySeq:
+        return emptySeq
+    restrev = reverse(seq[1:])
+    first = seq[0:1]
+    
+    result = restrev + first
+    return result
+# this function may be rewriten to the helper function style.
+# if the seq supports index operation.
+```

@@ -214,3 +214,10 @@ def __repr__(self):
 ```
 
 Python includes a function called eval that will take a string containing an expression and evaluate the expression in the string. For instance, `eval("6+5")` results in 11 and `eval("[1,2,3]"`) results in the `list [1,2,3]`. The `__repr__` method, if defined, should return a string representation of an object that is suitable to be given to the `eval` function.
+
+### Cloning Objects
+`eval(repr(x))` is a copy of object x. Since all the tiems in the PyList object x are cloned by evaluating the representation of the object. Cloning an object like this is called __deep copy__.  
+__shallow copy__: When an object is cloned, but items in the original object are shared with the clone.  
+`x = PyList([1,2,3])
+ y = PyList(x)`  
+ This shallow copy is ok, because integers 1,2,3 are immutable items. But we should be cautious when dealing with shallow copy of mutable items.

@@ -50,6 +50,9 @@ divides the list again and again, until we are left with lists of size 1. Two so
 
 The merge function takes care of merging two adjacent sublists. The first sublist runs from __start__ to __mid-1__. The second sublist runs from __mid__ to __stop-1__. The elements of the two sorted sublists are copied, in O(n) time, to a new list. Then the sorted list is copied back into the original sequence, again in O(n) time.
 
+One criticism of the merge sort algorithm is that the elements of the two sublists cannot be merged without copying to a new list and then back again. Other sorting methods, like Quicksort, have the same O(n log n) complexity as merge sort and do not require an extra list.  
+The repetitive splitting of the list results in O(log n) splits. Since there are log n levels to the merge sort algorithm and each level takes O(n) to merge, the algorithm is O(n log n).
+
 
 ```python
 def mergeSortRecursively(seq, start, stop):
@@ -71,6 +74,7 @@ def mergeSortRecursively(seq, start, stop):
     mergeSortRecursively(seq, mid, stop)
     merge(seq, start, mid, stop)
     
+# the difficult part is this merger part, use small test cases to draw illustration could help    
 def merge(seq, start, mid, stop):
     lst = []
     i = start
@@ -85,7 +89,8 @@ def merge(seq, start, mid, stop):
     while i < mid:
         lst.append(seq[i])
         i += 1
-        
+#     we do not need copy the rest of the sequence from j to stop to lst here, because if we did that, 
+#     in the following code the same part of the sequence would be copied right back to the same place.    
     for i in range(len(lst)):
         seq[start + i] = lst[i]
         
@@ -107,4 +112,86 @@ seq
 
 
 
+## Quicksort
+Quicksort is also a divide and conquer algorithm and is usually written recursively. But, where merge sort splits the list until we reach a size of 1 and then merges sorted lists, the quicksort algorithm does the merging first and then splits the list. We can鈥檛 merge an unsorted list. So we partition it into two lists. What we want is to prepare the list so quicksort can be called recursively. But, if we are to be successful, the two sublists must somehow be easier to sort than the original. This preparation for splitting is called partitioning.  
+To partition a list we pick a pivot element. Think of quicksort partitioning a list into all the items bigger than the pivot and all the elements smaller than the pivot.We put all the bigger items to the right of the pivot and all the littler items to the left of the pivot.  
 
+After this we can assure:  
+鈥?The pivot is in its final location in the list.  
+鈥?The two sublists are now smaller and can therefore be quicksorted.
+
+But picking the pivot is an art, if we want best performance, we need the pivot in the middle of the sequence.  
+For quicksort to have O(n log n) complexity, like merge sort, it must partition the list in O(n) time. If we don鈥檛 choose a pivot close to the middle, we will not get the O(n log n) complexity we hope for. One way is starting by randomizing the sequence.
+
+
+```python
+import random
+
+def partition(seq, start, stop):
+    pivotIndex = start
+    pivot = seq[pivotIndex]
+    i = start + 1
+    j = stop - 1
+    
+    while i <= j:
+#         while i <= j and seq[i] <= pivot:
+        while i <= j and not pivot < seq[i]:
+            i += 1
+#         while i <= j and seq[j] >pivot:
+        while i <= j and pivot < seq[j]:
+            j -= 1
+        if i < j:
+            tmp = seq[i]
+            seq[i] = seq[j]
+            seq[j] = tmp
+            i += 1
+            j -= 1
+        
+    seq[pivotIndex] = seq[j]
+    seq[j] = pivot
+    
+    return j
+
+def quicksortRecursively(seq, start, stop):
+    if start >= stop-1:
+        return
+    pivotIndex = partition(seq, start, stop)
+    
+    quicksortRecursively(seq, start, pivotIndex)
+    quicksortRecursively(seq, pivotIndex + 1, stop)
+
+
+def quicksort(seq):
+#     randomize the sequence
+    for i in range(len(seq)):
+        j = random.randint(0,len(seq)-1)
+        tmp = seq[i]
+        seq[i] = seq[j]
+        seq[j] = tmp
+    quicksortRecursively(seq, 0, len(seq))
+    
+
+
+
+```
+
+
+```python
+li = [7,6,4,5,3,2,1]
+quicksort(li)
+li
+```
+
+
+
+
+    [1, 2, 3, 4, 5, 6, 7]
+
+
+
+Every time a value bigger than the pivot is found on the left side and a value smaller than the pivot is found on the right side, the two values are swapped. Once we reach the middle from both sides, the pivot is swapped into place.  
+
+In the partition code, the two commented while loop conditions are probably easier to understand than the uncommented code. However, the uncommented code only uses the less than operator. It only requires that the less than operator be defined between items in the sequence.  
+If the sequence given to quicksort is sorted, or almost sorted, in either ascending or descending order, then quicksort will not achieve O(n log n) complexity. In fact, the worst case complexity of the algorithm is O(n2).
+
+The algorithm will simply put one value in place and end up with one big partition of all the rest of the values. If this happened each time a pivot was chosen it would lead to O(n2) complexity. Randomizing the list prior to quicksorting it will help to ensure that this does not happen.

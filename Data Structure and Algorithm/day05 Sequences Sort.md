@@ -44,7 +44,7 @@ def selSort(seq):
 
 ## 2. Merge Sort
 ### Divide and conquer algorithms: 
-usually written recursively, but don鈥檛 necessarily have to be. The basic premise is that we divide a problem into two pieces. Each of the two pieces is easier to solve.  
+usually written recursively, but dont necessarily have to be. The basic premise is that we divide a problem into two pieces. Each of the two pieces is easier to solve.  
 ### Merge sort:
 divides the list again and again, until we are left with lists of size 1. Two sorted sublists can be merged into one sorted list in O(n) time. A list can be divided into lists of size 1 by repeatedly splitting in O(log n) time.  
 
@@ -113,15 +113,15 @@ seq
 
 
 ## Quicksort
-Quicksort is also a divide and conquer algorithm and is usually written recursively. But, where merge sort splits the list until we reach a size of 1 and then merges sorted lists, the quicksort algorithm does the merging first and then splits the list. We can鈥檛 merge an unsorted list. So we partition it into two lists. What we want is to prepare the list so quicksort can be called recursively. But, if we are to be successful, the two sublists must somehow be easier to sort than the original. This preparation for splitting is called partitioning.  
+Quicksort is also a divide and conquer algorithm and is usually written recursively. But, where merge sort splits the list until we reach a size of 1 and then merges sorted lists, the quicksort algorithm does the merging first and then splits the list. We cant merge an unsorted list. So we partition it into two lists. What we want is to prepare the list so quicksort can be called recursively. But, if we are to be successful, the two sublists must somehow be easier to sort than the original. This preparation for splitting is called partitioning.  
 To partition a list we pick a pivot element. Think of quicksort partitioning a list into all the items bigger than the pivot and all the elements smaller than the pivot.We put all the bigger items to the right of the pivot and all the littler items to the left of the pivot.  
 
 After this we can assure:  
-鈥?The pivot is in its final location in the list.  
-鈥?The two sublists are now smaller and can therefore be quicksorted.
+1. The pivot is in its final location in the list.  
+2. The two sublists are now smaller and can therefore be quicksorted.
 
 But picking the pivot is an art, if we want best performance, we need the pivot in the middle of the sequence.  
-For quicksort to have O(n log n) complexity, like merge sort, it must partition the list in O(n) time. If we don鈥檛 choose a pivot close to the middle, we will not get the O(n log n) complexity we hope for. One way is starting by randomizing the sequence.
+For quicksort to have O(n log n) complexity, like merge sort, it must partition the list in O(n) time. If we dont choose a pivot close to the middle, we will not get the O(n log n) complexity we hope for. One way is starting by randomizing the sequence.
 
 
 ```python

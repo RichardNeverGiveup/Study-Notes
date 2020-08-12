@@ -14,7 +14,7 @@ When you reference an identifier in a statement in your program,
 Python first examines the local scope to see if the identifier is defined there, within
 the local scope. An identifier, id, is defined under one of three conditions:  
 <ul>
-<li>A statement like id =鈥ppears somewhere within the current scope.</li>
+<li>A statement like id = '6' appears somewhere within the current scope.</li>
 <li>id appears as a parameter name of the function in the current scope.</li>
 <li>id appears as a name of a function or class through the use of a function def or class definition within the current scope</li>
 </ul>  

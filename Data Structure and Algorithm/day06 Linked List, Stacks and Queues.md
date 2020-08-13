@@ -209,8 +209,50 @@ class Queue:
     def isEmpty(self):
         return self.frontIdx == len(self.items)
 ```
+## Application of S&Q
+### Infix Expression Evaluation
+#### 1. How to implement our own eval funciton for evaluating infix expression?
+An infix expression is an expression where operators appear in between their operands. Like (8 + 9)*2  
+Infix evaluator algorithm uses two stacks, an operator stack and an operand stack. The operator stack will hold operators and left parens. The operand stack holds numbers. The algorithm proceeds by scanning the tokens of the infix expression from left to right.  
+Each operator has a precedence associated with it:  
+/ * >>>  + -  >>> ()  
+
+The stacks are initialized to empty stacks and a left paren is pushed on the operator stack.
+1. If the token is an operator then we need to operate on the two stacks with the given operator.
+2. If the token is a number then we push it on the number stack.  
+
+After scanning all the input and operating when required, we operate on the stacks one more time with an extra right paren operator.  
+#### 2. The operate procedure is a separate function with operator, the operator stack, and operand stack as arguments.  
+__a.__ If the given operator is a left paren we push it on the operator stack and return.  
+__b.__ Otherwise, if the precedence of the given operator <= the top operator on the operator stack, do as follows:
+<ul>
+<li> Pop the top operator from the operator stack. Call this the topOp.
+<li>if topOp is a +, -，* or / then operate on the number stack by popping the operands, doing the operation, and pushing the result.
+<li>if topOp is a left paren, then the given operator should be a right paren. If so,operating is done and return immediately.  
+</ul>  
+
+__c.__ When the precedence of the given operator is greater than the precedence of topOp we terminate the loop and push the given operator on the operator stack before returning from operating.
 
 
-```python
 
+### Radix Sort
+This algorithm sorts a sequence of strings lexicographically, as they would appear in a phonebook or dictionary.  
+As the strings are read and placed in a queue called __mainQueue__, the algorithm keeps track of the length of the longest string that will be sorted, call it __longest__.  
+Radix sort requires all the strings in the mainQueue are of the same length, so those shorter strings should be padded with blanks.
+Besides, we also need a helper function that returns a character of a string like __chartAt()__.  
+```python 
+def charAt(s, i):
+    if len(s)-1 < i:
+        return " "
+    return s[i]
 ```
+
+This charAt() will make strings in mainQueue look like they are the same length.  
+There are also 256 queues created and placed into a list of queues, called queueList. There are 256 different possible ASCII values and one queue is created for each ASCII letter. Queues' indices 0-127, corresponding to the ASCII range.  
+1. remove a string from mainQueue, check the last character(starting at __longest-1__), placing the string on a queue that corresponds to the character's ASCII value. using function like __ord("a")__.  
+2. starting with the first queue in the queueList, all strings are dequeued from each queue and placed on the main queue.  
+3. go back to removing all elements from the main queue again, this time looking at the second to the last letter of each word.
+4. The process is repeated until we get to the first letter of each string. When we are done, all strings are on the main queue in sorted order.
+
+
+

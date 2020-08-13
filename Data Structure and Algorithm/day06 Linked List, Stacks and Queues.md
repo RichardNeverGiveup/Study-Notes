@@ -131,7 +131,7 @@ Sort operation is not applicable on linked lists. Efficient sorting algorithms r
 __It would be much more efficient to copy the linked list to a randomly accessible list, sort it, and then build a new sorted linked list from the sorted list.__
 
 ## 2. Stacks and Queues
-
+### Stacks
 Either a list or a linked list will suffice to implement a stack.
 
 
@@ -162,9 +162,53 @@ class Stack:
         return len(self.items) == 0
 ```
 
+### Queues
 To implement a queue with best complexities we need to be able to add to one end of a sequence and remove from the other end of the
 sequence in O(1) time. This suggests the use of a linked list.  
 However, we can use a list if we are willing to accept an amortized complexity of O(1) for the dequeue operation to implement a queue.
+
+
+```python
+class Queue:
+    def __init__(self):
+        self.items = []
+        self.frontIdx = 0
+    
+    def __compress(self):
+        # this function is to compress the queue when the queue has too many empty entries
+        newlst = []
+        for i in range(self.frontIdx, len(self.items)):
+            newlst.append(self.items[i])
+            
+        self.items = newlst
+        self.frontIdx = 0
+        
+    def dequeue(self):
+        if self.isEmpty():
+            raise RuntimeError("Attempt to dequeue an empty queue")
+            # this reaches an amortized complexity of O(1), just similar to what we did in 
+            # the list append. If we want to dequeue n element, if we dont compress the queue
+            # it would cost O(n).
+        if self.frontIdx * 2 > len(self.items):
+            # every time we dequeue an element, the frontIdx moved to the next position.
+            # so fronIdx is getting bigger, this means the queue is empty in the front.
+            # we need to shrink the size if the empty entries reach half of the list.
+            self.__compress()
+        item = self.items[self.frontIdx]
+        self.frontIdx += 1
+        return item
+    
+    def enqueue(self, item):
+        self.items.append(item)
+        
+    def front(self):
+        if self.isEmpty():
+            raise RuntimeError("Attempt to acess front of empty queue")
+        return self.items[self.frontIdx]
+    
+    def isEmpty(self):
+        return self.frontIdx == len(self.items)
+```
 
 
 ```python

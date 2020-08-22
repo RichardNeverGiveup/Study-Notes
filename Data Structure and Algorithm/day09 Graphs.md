@@ -80,12 +80,12 @@ origin[0] is origin[1]`
 The third operation requires forming a new set from the previous two. This operation will be performed |V|-1 times. In the worst case the first time this operation occurs 1 vertex will be added to an existing set. The second time, two vertices will be added to an existing set, and so on. The overall worst case complexity of this operation is O(|V|^2). So we may need a new data structure to improve this.  
 ### The Partition Data Structure
 The partition data structure contains a list of integers with one entry for each vertex. Initially, the list simply contains a list of integers which match their indices:  
-<li> $~$ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29</li>
+<li>  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29</li>
 <li>[ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]</li>
 
 Think of this trees as a list of trees, representing the sets of connected edges in the spanning forest constructed so far. __A tree's root is indicated when the value at a location within the list matches its index.__  __Discovering the set for a vertex means tracing a tree back to its root.__   
 consider what happens when the edge from vertex 3 to vertex 9 is considered for adding ? The partition at that time looks like this:
-<li> $~$ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29</li>
+<li>  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29</li>
 <li>[ 4,4,2,7,5,11,2,7,2,11,11,7,11,16,16,16,16,19,19,19,19,22,22,24,26,26,19,26,29,29]</li>
 
 Vertex 3 is not the root of its own tree at this time. Since 7 is found at index 3, we next look at index 7 of the partition list. That position in the partition list matches its value. The 3 is in the set (i.e. tree) rooted at location 7.    
@@ -94,7 +94,7 @@ Therefore vertex 3 and 9 are already in the same set and the edge from 3 to 9 ca
 
 If we consider adding edge(2,3), we will find they are in different sets because their root are different. Then we need to merge these two sets, how ? __By make the root of one of the trees point to the root of the other tree__.  
 Then we get this partition:
-<li> $~~$ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29</li>
+<li>  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29</li>
 <li>[ 4,4,2,7,5,11,2,2 2,11,11,7,11,16,16,16,16,19,19,19,19,22,22,24,26,26,19,26,29,29]</li>
 
 The partition data structure combines the __three required operations__ into one method called __`sameSetAndUnion`__. This method __receives two vertex numbers and returns Ture if the vertices are in a same set(have same root). If they do not have the same root, the root of one tree is made to point to the other and return false__.  

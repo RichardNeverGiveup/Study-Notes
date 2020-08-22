@@ -77,7 +77,7 @@ If we make sure there is only one copy of each set, we can determine if two sets
 origin[0] = origin[0].union(origin[1])
 origin[1] = origin[0]
 origin[0] is origin[1]`  
-The third operation requires forming a new set from the previous two. This operation will be performed |V|鈭? times. In the worst case the first time this operation occurs 1 vertex will be added to an existing set. The second time, two vertices will be added to an existing set, and so on. The overall worst case complexity of this operation is O(|V|^2). So we may need a new data structure to improve this.  
+The third operation requires forming a new set from the previous two. This operation will be performed |V|-1 times. In the worst case the first time this operation occurs 1 vertex will be added to an existing set. The second time, two vertices will be added to an existing set, and so on. The overall worst case complexity of this operation is O(|V|^2). So we may need a new data structure to improve this.  
 ### The Partition Data Structure
 The partition data structure contains a list of integers with one entry for each vertex. Initially, the list simply contains a list of integers which match their indices:  
 <li> $~$ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29</li>
@@ -99,7 +99,7 @@ Then we get this partition:
 
 The partition data structure combines the __three required operations__ into one method called __`sameSetAndUnion`__. This method __receives two vertex numbers and returns Ture if the vertices are in a same set(have same root). If they do not have the same root, the root of one tree is made to point to the other and return false__.  
 The sameSetAndUnion method first finds the roots of the two vertices given to it. In the worst case this could take O(|V|) time leading to an overall complexity of O(|V|^2), because there are |V-1| edges. However, in practice these set trees are very flat.  
-The average case complexity of sameSetAndUnion is much closer to O(log|V|). This means that the second part of Kruskal鈥檚 algorithm, using this partition data structure, exhibits O(|E|log|V|) complexity in the average case.  
+The average case complexity of sameSetAndUnion is much closer to O(log|V|). This means that the second part of Kruskal's algorithm, using this partition data structure, exhibits O(|E|log|V|) complexity in the average case.  
 So the overall average complexity of K's algorithm is O(|E|log|E|).
 
 

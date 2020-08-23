@@ -103,9 +103,6 @@ The average case complexity of sameSetAndUnion is much closer to O(log|V|). This
 So the overall average complexity of K's algorithm is O(|E|log|E|).
 
 
-
-
-```python
 ## 3. Dijkstra's Algorithm
 This alogrithm can help us find the minimum cost path between any two vertices in a weighted graph.  
 Each vertex(v) in the graph is assigned a cost which is the sum of the weighted edges on the path from the source to v. Initially the sourece v is assigned cost 0, all other v are assigned infinite cost(bigger than the sum of all weights).  

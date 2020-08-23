@@ -106,6 +106,22 @@ So the overall average complexity of K's algorithm is O(|E|log|E|).
 
 
 ```python
+## 3. Dijkstra's Algorithm
+This alogrithm can help us find the minimum cost path between any two vertices in a weighted graph.  
+Each vertex(v) in the graph is assigned a cost which is the sum of the weighted edges on the path from the source to v. Initially the sourece v is assigned cost 0, all other v are assigned infinite cost(bigger than the sum of all weights).  
+There are two sets in this algorithm, first is an __unvisited set__, this is a set of v that need to be considered while looking for minimum cost paths, it is like the __stack__ when performing __depth first search__ on a graph. Then we still need a __visited set__.  
+We can keep track of the min cost path from the source to a v by keeping track of the previous v on the path to v. __For each v, we record the previous v on its path from the source.__  
+Initially the source v, with its cost(0), is added to the __unvisited set__, then we will keep doing the following steps until the __unvisited set__ is empty:  
+1. remove the v(call it current; with the least cost) from unvisited set.
+2. add current to the visited set.
+3. for every adjacent v(adjacent to current), check if it is in the visited or not. If it is in there, then we know the min cost of reaching this v from the source so don't do anything
+4. If adjacent is not in the visited set, compute a new cost for arriving at adjacent by traversing the edge from current to adjacent. A new cost can be found by this(__the cost of getting to current + edge's weight__). If this new cost is better than the current cost of getting to adjacent(initially it's infinite), then update adjacent's cost and remember that current is the previous v of adjacent. Also, add adjacent to the unvisited set.  
+
+When this algorithm terminates, the cost of reaching all vertices in the graph has been computed assuming that all vertices are reachable from the source vertex. The minimum cost path to each vertex can be determined from the previousvertex information that was maintained as the algorithm executed.
+
+
+```python
+
 
 ```
 

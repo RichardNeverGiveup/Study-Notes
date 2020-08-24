@@ -116,23 +116,6 @@ Initially the source v, with its cost(0), is added to the __unvisited set__, the
 
 When this algorithm terminates, the cost of reaching all vertices in the graph has been computed assuming that all vertices are reachable from the source vertex. The minimum cost path to each vertex can be determined from the previousvertex information that was maintained as the algorithm executed.
 
-
-```python
-
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
+### Complexity Analysis
+The number of edges of any vertex in a __undirected__ graph will always be __less than__ the number of total vertices in the graph. Each v becomes the _current_ v once, so let's __assume finding the next current takes O(|V|) time__, then this happens |V| times, the first step is O(|V|^2). For the next steps, consider those edges adjacent to _current_ , since the number of edges of any v will always be less than |V|, so these steps run in less than O(|V|^2). So the overall complexity is O(|V|^2)  
+But we can use __Priority queues__ to reduce the time for selecting the next _current_ in O(log|V|) time, and improve the total complexity to O(|V|log|V|).

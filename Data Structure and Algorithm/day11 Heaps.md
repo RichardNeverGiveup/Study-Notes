@@ -73,7 +73,7 @@ Consider a perfect complete binary tree with h levels:
 the nodes in the tree can be computed using geometric sequence formula: $n = 2^h -1$.  So h is equal to log, base 2 of n+1, but not every heap is completely full so there may be some values of n that won't give us an integer for h, then we need to round up using the __ceiling operator__.  
 To determine the complexity of phase I, we will use the inequality __logI <= log(I+1) <=logI + 1__, the base is 2 and for any I >= 2  
 Since we knew the ceilling of $log(I+1)$ is height of the heap(h), and Phase I appends each value to the end of the list where it is sifted up to its final location. Since __sifting up will go through at most h levels and the heap grows by one each time__,   
-The following summation describes an upper bound for Phase I:  $\sum_{2}^{N}c log(I+1)$, _clog means ceilling after log_.  
+The following summation describes an upper bound for Phase I:  $\sum_{2}^{N}c log(I+1)$ , _clog means ceilling after log_.  
 
 Then we have $\sum_{2}^{N}logI$ <= $\sum_{2}^{N}clog(I+1)$ <= $\sum_{2}^{N}(logI+1)$ = $(\sum_{2}^{N}logI)+(N-1)$. Using some calculus, we can get the result of $\sum_{2}^{N}logI$, then we can prove the upper and lower bound are the same. So the work done by inserting N elements into a heap using the `__siftUpFrom` method is $\Theta (NlogN)$. But we can do better using another approach to achieve O(N).
 ### Phase 2

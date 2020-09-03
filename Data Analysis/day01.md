@@ -1,9 +1,10 @@
 
 
 ```python
-鈥?Python Cookbook, Third Edition, by David Beazley and Brian K. Jones (O鈥橰eilly)
-鈥?Fluent Python by Luciano Ramalho (O鈥橰eilly)
-鈥?Effective Python by Brett Slatkin (Pearson)
+# some books need to follow up in the future
+Python Cookbook, Third Edition, by David Beazley and Brian K. Jones 
+Fluent Python by Luciano Ramalho 
+Effective Python by Brett Slatkin (Pearson)
 
 # ploty, seaborn, Bokeh
 ```

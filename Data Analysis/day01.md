@@ -38,7 +38,7 @@ arr2.dtype
 # type(arr2) will not show the data type but only show ndarry
 numeric_strings = np.array(['1.25', '-9.6', '42'], dtype=np.string_) # we can specify the dtype when we creat an array.
 
-# 3.An important first distinction from Python鈥檚 built-in lists is that array slices are views on the original array.
+# 3.An important first distinction from Python's built-in lists is that array slices are views on the original array.
 # This means that the data is not copied, and any modifications to the view will be reflected in the source array.
 
 arr2d = np.array([[1,2,3],[4,5,6],[7,8,9]])
@@ -562,7 +562,6 @@ people.groupby(map_series, axis=1).count()
 
 # Grouping with Functions
 people.groupby(len).sum() # use the lengths of the strings in the index to group
-key_list = ['one', 'one', 'one', 'two', 'two']
 # Mixing functions with arrays, dicts, or Series is not a problem as everything gets converted to arrays internally.
 key_list = ['one', 'one', 'one', 'two', 'two']
 people.groupby([len, key_list]).min()
@@ -585,135 +584,419 @@ grouped.agg(peak_to_peak)
 grouped.describe()
 
 # Column-Wise and Multiple Function Application
-grouped_pct.agg(['mean', 'std', peak_to_peak])  # after you grouped sth, you can call agg() method on it, and TAB to explore it.
+# grouped_pct.agg(['mean', 'std', peak_to_peak])  # after you grouped sth, you can call agg() method on it, and TAB to explore it.
 
 # pass a list of (name, function) tuples, the first element of each tuple will be used as the DataFrame column names
-grouped_pct.agg([('foo', 'mean'), ('bar', np.std)])
+# grouped_pct.agg([('foo', 'mean'), ('bar', np.std)])
 
 # a list of tuples with custom names can be passed
 ftuples = [('Durchschnitt', 'mean'), ('Abweichung', np.var)]
-grouped['tip_pct', 'total_bill'].agg(ftuples)  # this looks like the (name, function) tuples where the name is DF column names.
+# grouped['tip_pct', 'total_bill'].agg(ftuples)  # this looks like the (name, function) tuples where the name is DF column names.
 # but it is different, since we used the column names first, then we call agg(), this produces nicknames for the functions in df. 
 
 # when we wanted to apply several different functions to one or more of the columns
-grouped.agg({'tip_pct' : ['min', 'max', 'mean', 'std'], 'size' : 'sum'})
+# grouped.agg({'tip_pct' : ['min', 'max', 'mean', 'std'], 'size' : 'sum'})
 
 # the aggregated data comes back with an index, potentially hierarchical, composed from the unique group key combinations.
 # if we want disable this property. we passing in as_index=False
-tips.groupby(['day', 'smoker'], as_index=False).mean()
+# tips.groupby(['day', 'smoker'], as_index=False).mean()
 
 
+# Apply: General split-apply-combine
 
+def top(df, n=5, column='tip_pct'):
+    return df.sort_values(by=column)[-n:]
+# tips.groupby('smoker').apply(top)
+# tips.groupby(['smoker', 'day']).apply(top, n=1, column='total_bill')
 
+f = lambda x: x.describe()
+# grouped.apply(f)
 
+# if you do not want the hierarchical index formed from the group keys along with the indexes, pass group_keys=False to groupby
+# tips.groupby('smoker', group_keys=False).apply(top)
 
+frame = pd.DataFrame({'data1': np.random.randn(1000), 'data2': np.random.randn(1000)})
+quartiles = pd.cut(frame.data1, 4)
+def get_stats(group):
+    return {'min': group.min(), 'max': group.max(), 'count': group.count(), 'mean': group.mean()}
+grouped = frame.data2.groupby(quartiles)
+grouped.apply(get_stats).unstack()
 
+grouping = pd.qcut(frame.data1, 10, labels=False)   # pass labels=False to get quantile numbers, not the interval like(-1,-2]
+grouped = frame.data2.groupby(grouping)
+grouped.apply(get_stats).unstack()
 
+# 1.Filling Missing Values with Group-Specific Values
+s = pd.Series(np.random.randn(6))
+s[::2] = np.nan
+s.fillna(s.mean())
+
+states = ['Ohio', 'New York', 'Vermont', 'Florida', 'Oregon', 'Nevada', 'California', 'Idaho']
+group_key = ['East'] * 4 + ['West'] * 4
+data = pd.Series(np.random.randn(8), index=states)
+data[['Vermont', 'Nevada', 'Idaho']] = np.nan
+
+data.groupby(group_key).mean()
+
+fill_mean = lambda g: g.fillna(g.mean())
+data.groupby(group_key).apply(fill_mean)
+
+# if we have predefined fill values that vary by group. Since the groups have a name attribute set internally, we can do this:
+fill_values = {'East': 0.5, 'West': -1}
+fill_func = lambda g: g.fillna(fill_values[g.name])
+data.groupby(group_key).apply(fill_func)
+
+# 2.Random Sampling and Permutation
+suits = ['H', 'S', 'C', 'D']
+card_val = (list(range(1, 11)) + [10] * 3) * 4
+base_names = ['A'] + list(range(2, 11)) + ['J', 'K', 'Q']
+cards = []
+for suit in ['H', 'S', 'C', 'D']:
+    cards.extend(str(num) + suit for num in base_names)
+deck = pd.Series(card_val, index=cards)
+deck[:13]
+
+def draw(deck, n=5):
+    return deck.sample(n)
+draw(deck)
+# Suppose you wanted two random cards from each suit. Because the suit is the last
+# character of each card name, we can group based on this and use apply:
+get_suit = lambda card: card[-1]
+deck.groupby(get_suit).apply(draw, n=2)
+deck.groupby(get_suit, group_keys=False).apply(draw, n=2)
+
+# 3.Group Weighted Average and Correlation
+df = pd.DataFrame({'category': ['a', 'a', 'a', 'a',
+                    'b', 'b', 'b', 'b'],
+                    'data': np.random.randn(8),
+                    'weights': np.random.rand(8)})
+grouped = df.groupby('category')
+get_wavg = lambda g: np.average(g['data'], weights=g['weights'])
+grouped.apply(get_wavg)
+
+# comment these due to network in YMTC can not download .csv.
+# close_px = pd.read_csv('examples/stock_px_2.csv', parse_dates=True, index_col=0)
+# close_px.info()
+# spx_corr = lambda x: x.corrwith(x['SPX'])
+# rets = close_px.pct_change().dropna()
+# get_year = lambda x: x.year
+# by_year = rets.groupby(get_year)
+# by_year.apply(spx_corr)
+# by_year.apply(lambda g: g['AAPL'].corr(g['MSFT']))
+
+# 4.Group-Wise Linear Regression
+import statsmodels.api as sm
+def regress(data, yvar, xvars):
+    Y = data[yvar]
+    X = data[xvars]
+    X['intercept'] = 1.
+    result = sm.OLS(Y, X).fit()
+    return result.params
+# executes an ordinary least squares (OLS) regression on each chunk of data
+by_year.apply(regress, 'AAPL', ['SPX'])  # run a yearly linear regression of AAPL on SPX
+
+# DataFrame has a pivot_table method
+# providing a convenience interface to groupby, pivot_table can add partial totals, also known as margins
+
+# tips.pivot_table(index=['day', 'smoker'])
+# tips.pivot_table(['tip_pct', 'size'], index=['time', 'day'], columns='smoker')
+# tips.pivot_table(['tip_pct', 'size'], index=['time', 'day'], columns='smoker', margins=True)
+
+# tips.pivot_table('tip_pct', index=['time', 'smoker'], columns='day', aggfunc=len, margins=True)
+# tips.pivot_table('tip_pct', index=['time', 'size', 'smoker'], columns='day', aggfunc='mean', fill_value=0)
+# use TAB to explore the params in pivot_table()
+
+# Cross-Tabulations: Crosstab is a special case of a pivot table that computes group frequencies.
+# pd.crosstab(data.Nationality, data.Handedness, margins=True)
+# pd.crosstab([tips.time, tips.day], tips.smoker, margins=True)
 ```
 
+## 7. Time Series
 
 
+```python
+from datetime import datetime
+now = datetime.now()
+now.year, now.month, now.day
+delta = datetime(2011, 1, 7) - datetime(2008, 6, 24, 8, 15)
+delta
+delta.days
+delta.seconds
+from datetime import timedelta
+start = datetime(2011, 1, 7)
+start + timedelta(12)
+start - 2 * timedelta(12)
 
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
+stamp = datetime(2011, 1, 3)
+str(stamp)
+stamp.strftime('%Y-%m-%d') # get string from timestamp
+value = '2011-01-03'
+datetime.strptime(value, '%Y-%m-%d')  # get timestamp from string
 
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
+datestrs = ['7/6/2011', '8/6/2011']
+[datetime.strptime(x, '%m/%d/%Y') for x in datestrs]
 
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>key1</th>
-      <th>key2</th>
-      <th>data1</th>
-      <th>data2</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>a</td>
-      <td>one</td>
-      <td>-0.628617</td>
-      <td>0.441954</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>a</td>
-      <td>two</td>
-      <td>-0.973279</td>
-      <td>0.516811</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>b</td>
-      <td>one</td>
-      <td>-1.045809</td>
-      <td>-0.279760</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>b</td>
-      <td>two</td>
-      <td>0.335970</td>
-      <td>-0.123966</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>a</td>
-      <td>one</td>
-      <td>0.661918</td>
-      <td>0.648523</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+from dateutil.parser import parse  # this is a third party package
+parse('2011-01-03')
+parse('Jan 31, 1997 10:45 PM')
+parse('6/12/2011', dayfirst=True)
+
+datestrs = ['2011-07-06 12:00:00', '2011-08-06 00:00:00']
+pd.to_datetime(datestrs)
+idx = pd.to_datetime(datestrs + [None])        # this also handles the missing value, like None
+pd.isnull(idx)
+# dateutil.parser is a useful but imperfect tool. Notably, it will recognize
+# some strings as dates that you might prefer that it did not.
+# datetime objects also have a number of locale-specific formatting options: %a %A %b %B %c.....
+
+from datetime import datetime
+dates = [datetime(2011, 1, 2), datetime(2011, 1, 5),
+        datetime(2011, 1, 7), datetime(2011, 1, 8),
+        datetime(2011, 1, 10), datetime(2011, 1, 12)]
+ts = pd.Series(np.random.randn(6), index=dates)
+ts.index
+ts + ts[::2]
+stamp = ts.index[0]
+ts.index.dtype
+stamp = ts.index[2]
+ts[stamp]
+ts['1/10/2011']  # you can also pass a string that is interpretable as a date
+ts['20110110']
+
+longer_ts = pd.Series(np.random.randn(1000), index=pd.date_range('1/1/2000', periods=1000))
+longer_ts['2001']
+longer_ts['2001-05']
+ts[datetime(2011, 1, 7):]
+ts['1/6/2011':'1/11/2011']
+
+dates = pd.date_range('1/1/2000', periods=100, freq='W-WED')
+long_df = pd.DataFrame(np.random.randn(100, 4),
+                        index=dates,
+                        columns=['Colorado', 'Texas',
+                                'New York', 'Ohio'])
+long_df.loc['5-2001']
+# time series with duplicate indices
+dates = pd.DatetimeIndex(['1/1/2000', '1/2/2000', '1/2/2000', '1/2/2000', '1/3/2000'])
+dup_ts = pd.Series(np.arange(5), index=dates)
+dup_ts
+dup_ts.index.is_unique
+dup_ts['1/2/2000']
+grouped = dup_ts.groupby(level=0)
+grouped.mean()
+grouped.count()
+
+# Date Ranges, Frequencies, and Shifting
+ts
+resampler = ts.resample('D')   # 'D' is interpreted as daily frequency
+# Conversion between frequencies or resampling
+
+index = pd.date_range('2012-04-01', '2012-06-01')
+pd.date_range(start='2012-04-01', periods=20)
+pd.date_range(end='2012-06-01', periods=20)
+pd.date_range('2000-01-01', '2000-12-01', freq='BM')  # there are a lot of freq supported, check documentation when needed
+
+pd.date_range('2012-05-02 12:56:31', periods=5)
+# Sometimes you will have start or end dates with time information but want to generate
+# a set of timestamps normalized to midnight as a convention
+pd.date_range('2012-05-02 12:56:31', periods=5, normalize=True)
+
+# Frequencies and Date Offsets
+from pandas.tseries.offsets import Hour, Minute
+hour = Hour()
+four_hours = Hour(4)
+pd.date_range('2000-01-01', '2000-01-03 23:59', freq='4h')
+Hour(2) + Minute(30)
+pd.date_range('2000-01-01', periods=10, freq='1h30min')
+
+# Shifting (Leading and Lagging) Data
+ts = pd.Series(np.random.randn(4), index=pd.date_range('1/1/2000', periods=4, freq='M'))
+ts.shift(2)  # shifts forward or backward, leaving the index unmodified.
+ts.shift(-2)
+
+# A common use of shift is computing percent changes in a time series or multiple time series as DataFrame columns.
+ts / ts.shift(1) - 1
+ts.shift(2, freq='M')
+
+from pandas.tseries.offsets import Day, MonthEnd
+now = datetime(2011, 11, 17)
+now + 3 * Day()
+now + MonthEnd()
+now + MonthEnd(2)
+# Anchored offsets can explicitly 鈥渞oll鈥?dates forward or backward
+offset = MonthEnd()
+offset.rollforward(now)
+offset.rollback(now)
+# A creative use of date offsets is to use these methods with groupby:
+ts = pd.Series(np.random.randn(20), index=pd.date_range('1/15/2000', periods=20, freq='4d'))
+ts.groupby(offset.rollforward).mean()
+
+ts.resample('M').mean() # this is equivalent to the two lines above.
+
+# Time Zone Handling
+# Time zone names can befound interactively and in the docs
+import pytz
+pytz.common_timezones[-5:]
+tz = pytz.timezone('America/New_York')
+# By default, time series in pandas are time zone naive
+rng = pd.date_range('3/9/2012 9:30', periods=6, freq='D')
+ts = pd.Series(np.random.randn(len(rng)), index=rng)
+print(ts.index.tz) # The index鈥檚 tz field is None
+
+pd.date_range('3/9/2012 9:30', periods=10, freq='D', tz='UTC')
+# Conversion from naive to localized is handled by the tz_localize method
+ts
+ts_utc = ts.tz_localize('UTC')
+ts_utc
+ts_utc.index
+ts_utc.tz_convert('America/New_York')
+
+# if we want to change the time zone to Berlin, we can convert to UTC then to Berlin
+ts_eastern = ts.tz_localize('America/New_York')
+ts_eastern.tz_convert('UTC')
+ts_eastern.tz_convert('Europe/Berlin')
+
+# tz_localize and tz_convert are instance methods on DatetimeIndex, too.
+ts.index.tz_localize('Asia/Shanghai')
+# Localizing naive timestamps also checks for ambiguous or nonexistent times around daylight saving time transitions.
+
+# Timestamp objects can be also localized from naive to time zone鈥揳ware and converted from one time zone to another
+stamp = pd.Timestamp('2011-03-12 04:00')
+stamp_utc = stamp.tz_localize('utc')
+stamp_moscow = pd.Timestamp('2011-03-12 04:00', tz='Europe/Moscow')
+stamp_utc.tz_convert('America/New_York').value
+
+# Operations Between Different Time Zones
+# If two time series with different time zones are combined, the result will be UTC
+rng = pd.date_range('3/7/2012 9:30', periods=10, freq='B')
+ts = pd.Series(np.random.randn(len(rng)), index=rng)
+ts1 = ts[:7].tz_localize('Europe/London')
+ts2 = ts1[2:].tz_convert('Europe/Moscow')
+result = ts1 + ts2
+result.index
+
+# Periods represent timespans, like days, months, quarters, or years.
+p = pd.Period(2007, freq='A-DEC')
+# the Period object represents the full timespan from January 1, 2007, to December 31, 2007, inclusive.
+p + 5
+p - 2
+pd.Period('2014', freq='A-DEC') - p
+
+rng = pd.period_range('2000-01-01', '2000-06-30', freq='M')
+pd.Series(np.random.randn(6), index=rng)
+
+values = ['2001Q3', '2002Q2', '2003Q1']
+index = pd.PeriodIndex(values, freq='Q-DEC')
+# Period Frequency Conversion
+p = pd.Period('2007', freq='A-DEC')
+p.asfreq('M', how='start')
+p.asfreq('M', how='end')
+
+p = pd.Period('2007', freq='A-JUN')
+p.asfreq('M', 'start')
+p.asfreq('M', 'end')
+
+p = pd.Period('Aug-2007', 'M')
+p.asfreq('A-JUN')
+# check the outputs of these lines to see the meaning of them.
+
+rng = pd.period_range('2006', '2009', freq='A-DEC')
+ts = pd.Series(np.random.randn(len(rng)), index=rng)
+ts.asfreq('M', how='start')
+ts.asfreq('B', how='end')
+
+# pandas supports all 12 possible quarterly frequencies as Q-JAN through Q-DEC
+# Much quarterly data is reported relative to a fiscal year end, typically the last calendar or business day
+# of one of the 12 months of the year. The period 2012Q4 has a different meaning depending on fiscal year end.
+
+p = pd.Period('2012Q4', freq='Q-JAN')
+p.asfreq('D', 'start')
+p.asfreq('D', 'end')
+# get the timestamp at 4 PM on the second-to-last business day of the quarter
+p4pm = (p.asfreq('B', 'e') - 1).asfreq('T', 's') + 16 * 60
+p4pm
+p4pm.to_timestamp()
+
+rng = pd.period_range('2011Q3', '2012Q4', freq='Q-JAN')
+ts = pd.Series(np.arange(len(rng)), index=rng)
+new_rng = (rng.asfreq('B', 'e') - 1).asfreq('T', 's') + 16 * 60
+ts.index = new_rng.to_timestamp()
+ts  # check this output and understand the fiscal year end of JAN
+# 1 |2 3 4| 5 6 7| 8 9 10| 11 12
+#    Q1      Q2     Q3       Q4
+
+# Converting Timestamps to Periods (and Back)
+# Series and DataFrame objects indexed by timestamps can be converted to periods with the to_period method:
+rng = pd.date_range('2000-01-01', periods=3, freq='M')
+ts = pd.Series(np.random.randn(3), index=rng)
+pts = ts.to_period()
+pts
+
+rng = pd.date_range('1/29/2000', periods=6, freq='D')
+ts2 = pd.Series(np.random.randn(6), index=rng)
+ts2.to_period('M')
+pts = ts2.to_period()
+pts.to_timestamp(how='end')
+# Creating a PeriodIndex from Arrays
+# Fixed frequency datasets are sometimes stored with timespan information spread across multiple columns
+# index = pd.PeriodIndex(year=data.year, quarter=data.quarter, freq='Q-DEC')
 
 
+# Resampling refers to the process of converting a time series from one frequency to another.
+# Aggregating higher frequency data to lower frequency is called downsampling, 
+# while converting lower frequency to higher frequency is called upsampling.
+# resample has a similar API to groupby; you call resample to group the data, then call an aggregation function.
+rng = pd.date_range('2000-01-01', periods=100, freq='D')
+ts = pd.Series(np.random.randn(len(rng)), index=rng)
+ts.resample('M').mean()
+ts.resample('M', kind='period').mean() # check the params in the resample() method.
+
+rng = pd.date_range('2000-01-01', periods=12, freq='T')
+ts = pd.Series(np.arange(12), index=rng)
+ts.resample('5min', closed='right').sum()  # By default, the left bin edge is inclusive.
+ts.resample('5min', closed='right').sum()  
+# The resulting time series is labeled by the timestamps from the left side of each bin
+ts.resample('5min', closed='right', label='right').sum()
+# you might want to shift the result index by some amount
+ts.resample('5min', closed='right', label='right', loffset='-1s').sum()
+
+# Open-High-Low-Close (OHLC) resampling
+# In finance, a popular way to aggregate a time series is to compute four values for each
+# bucket: the first (open), last (close), maximum (high), and minimal (low) values.
+ts.resample('5min').ohlc()
+
+frame = pd.DataFrame(np.random.randn(2, 4),
+                    index=pd.date_range('1/1/2000', periods=2,
+                                        freq='W-WED'),
+                    columns=['Colorado', 'Texas', 'New York', 'Ohio'])
+df_daily = frame.resample('D').asfreq()
+df_daily
+frame.resample('D').ffill(limit=2)
+
+frame = pd.DataFrame(np.random.randn(24, 4),
+                    index=pd.period_range('1-2000', '12-2001',
+                                            freq='M'),
+                    columns=['Colorado', 'Texas', 'New York', 'Ohio'])
+annual_frame = frame.resample('A-DEC').mean()
+# check these following two lines
+annual_frame.resample('Q-DEC').ffill()
+annual_frame.resample('Q-DEC', convention='end').ffill()
+```
+
+## 8. Advanced Pandas
 
 
 ```python
 
 ```
 
-
-```python
-
-```
+## 9. Modeling Libs Intro
 
 
 ```python
 
 ```
 
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
-
-
-```python
-
-```
+## 10. ExampleS
 
 
 ```python

@@ -489,6 +489,6 @@ title_and_labels(axes[2], "contour")
 ```python
 # some recommendations:
 # Devert, A. (2014). matplotlib Plotting Cookbook. Mumbai: Packt
-# J. Steele, N. I. (2010). Beautiful Visualization. Sebastopol: O鈥橰eilly
+# J. Steele, N. I. (2010). Beautiful Visualization. Sebastopol: O'Reilly
 # Milovanovi, I. (2013). Python Data Visualization Cookbook. Mumbai: Packt
 ```

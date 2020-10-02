@@ -229,5 +229,144 @@ watch out! some nature implications are not automatically provided by python. li
 
 
 ```python
-
+v =  Vector(5) # construct a five-dimensional <0,0,0,0,0>
+v[1] = 23      #<0,23,0,0,0> based on use of __setitem__
+v[-1] = 45     #<0,23,0,0,45> also via __setitem__
+print(v[4])    #print 45 via __getitem__
+u = v + v      #<0,46,0,0,90> via __add__
+total = 0
+for entry in v:  # implicit iteration via __len__ and __getitem__
+    total += entry   
 ```
+
+eg: if we want to implement a Vector Class with this above attributes. What should we do?  
+Note that, our Vector class automatically supports the syntax u = v + [5,3,10,-2,1]. We never declared the other parameter of our `__add__` method as another Vector instance. The only behaviors we rely on for paramter other is that it supports len(other) and access to other[j]. This is the __polymorphism__ of python, the base form is that two methods, if your user-defined special class supports these two methods, then we can use its instance as operand(__we treat it as a duck, if it walks and swims like a duck__)
+
+
+```python
+class Vector:
+    """Represent a vector in a multidimensional space."""
+    def __init__(self,d):
+        """Creat d-dimensional vector of zeros."""
+        self._coords = [0] * d
+    def __len__(self):
+        """Return the dimension of the vector"""
+        return len(self._coords)
+    def __getitem__(self,j):
+        """Return jth coordinate of vector"""
+        return self._coords[j]
+    def __setitem__(self,j,val):
+        """Set jth coordinate of vector to a val"""
+        self._coords[j] = val
+    def __add__(self, other):
+        """Return sum of two vectors"""
+        if len(self) != len(other):
+            raise ValueError('dimensions must be the same')
+        result = Vector(len(self))
+        for j in range(len(self)):
+            result[j] = self[j] + other[j]
+        return result
+    def __eq__(self,other):
+        return self._coords == other._coords
+    def __ne__(self,other):
+        return not self == other
+    def __str__(self):
+        return '<' + str(self._coords)[1:-1] + '>'
+
+# for now, this class constructor do not support passing in a sequence as params.
+```
+
+__iterator__: supports `__next__` method to return the next element for the collection or rasise a StopIteration exception to indicate there are no more elements. We seldom need to implement an iterator class directly, the preferred way is use __generator__ syntax through the `yield` keyword.  
+
+python supports automatic iterator implementation for a class that defines both `__len__ and __getitem__`.
+
+
+```python
+class SequenceIterator:
+    """An iterator for any of Python's sequence types."""
+    def __init__(self, sequence):
+        """Create an iterator for the given sequence."""
+        self._seq = sequence         # keep a reference to the underlying data
+        self._k = -1
+        
+    def __next__(self):
+        """Return the next element, or else raise StopIteration error."""
+        self._k += 1
+        if self._k < len(self._seq):
+            return(self._seq[self._k])
+        else:
+            raise StopIteration
+    
+    def __iter__(self):
+        """By convention, an iterator must return itself as an iterator"""
+        return self
+```
+
+
+```python
+class Range:
+    """A class that mimics the built-in range class."""
+    def __init__(self,start,stop=None,step=1):
+        if step == 0:
+            raise ValueError('step cannot be 0')
+        if stop is None:
+            start, stop = 0, start
+        
+        # calculate the effective length once
+        self._length = max(0, (stop - start + step - 1)//step)
+        
+        self._start = start
+        self._step = step
+        
+    def __len__(self):
+        return self._length
+    
+    def __getitem__(self,k):
+        if k < 0:
+            k += len(self)
+        if not 0 <= k < self._length:
+            raise IndexError('index out of range')
+        return self._start + k*self._step
+```
+
+
+```python
+class PredatoryCreditCard(CreditCard):
+    """An extension to CreditCard that compounds interest and fees."""
+    def __init__(self,customer,bank,acnt,limit,apr):
+        """Creat a new predatory credit card instance.
+        
+        The initial balance is zero.
+        
+        customer the name of the customer (e.g., 'Ruilin Cheng')
+        bank     the name of the bank (e.g., 'California Savings')
+        acnt     the acount identifier (e.g., '5391 0375 9387 5309')
+        limit    credit limit (measured in dollars)
+        apr      annual percentage rate(eg., 0.0825 for 8.25% APR)
+        """
+        super().__init__(customer,bank,acnt,limit)
+        self._apr = apr
+    
+    def charge(self, price):
+        """Charge given price to the card, assuming sufficient credit limit.
+        
+        Return True if charge was processed.
+        Return False and assess $5 fee if charge is denied.
+        """
+        success = super().charge(price)
+        if not success:
+            self._balance += 5
+        return success
+    
+    def process_month(self):
+        """Assess monthly interest on outstanding balance."""
+        if self._balance > 0:
+            monthly_factor = pow(1 + self._apr, 1/12)
+            self._balance *= monthly_factor
+```
+
+PredatoryCreditCard subclass directly accesses the data memeber `self._balance`, which was established by the parent CreditCard class. The underscore name, by convention should not be accessed this way, but subclass has privilege to do so. For C++, for nonpublic members, should be declared with __protected__(single underscore in python) or __priviate__(double underscore in python). Protected members are accessbile to subclass, Priviate members should not be accessible both to public or subclass.  
+
+In the above subclass, we created dependency since we used this nonpublic member `self._balance`, if the CreditCard changed its internal design, our class may lost its functionality.  
+We could use public get_balance() method to retrieve the current balance within the process_month() method, but the current design of CreditCard dose not afford an effective way for subclass to change the balance, other than by direct manipulation of the data member.  
+If we can redesign the CreditCard, we can add a nonpublic method, `_set_balance`, that could be used by subclass to change balance without directly accessing the data member `_balance`. And if the author of CreditCard want to redesign this class, he would also leave this interface for the potential subclass defined by others in the future. So, in this way, subclass definers will not worried about the dependency that the baseclass internal data member may change some day.

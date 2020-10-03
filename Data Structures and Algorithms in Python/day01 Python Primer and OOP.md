@@ -370,3 +370,130 @@ PredatoryCreditCard subclass directly accesses the data memeber `self._balance`,
 In the above subclass, we created dependency since we used this nonpublic member `self._balance`, if the CreditCard changed its internal design, our class may lost its functionality.  
 We could use public get_balance() method to retrieve the current balance within the process_month() method, but the current design of CreditCard dose not afford an effective way for subclass to change the balance, other than by direct manipulation of the data member.  
 If we can redesign the CreditCard, we can add a nonpublic method, `_set_balance`, that could be used by subclass to change balance without directly accessing the data member `_balance`. And if the author of CreditCard want to redesign this class, he would also leave this interface for the potential subclass defined by others in the future. So, in this way, subclass definers will not worried about the dependency that the baseclass internal data member may change some day.
+```python
+class Progression:
+    """Iterator producing a generica progression.
+    
+    Default iterator produces the 0,1,2,...
+    """
+    
+    def __init__(self, start=0):
+        """Initialize current to the first value of the progression."""
+        self._current = start
+        
+    def _advance(self):
+        """Update self._current to a new value.
+        
+        This is provided for subclass, and should be overridden to customize progression.
+        
+        By convention, if current is set to None, this designates the end of a finite progression.
+        """
+        self._current += 1
+    
+    def __next__(self):
+        """Return the next element or Raise StopIteration error."""
+        if self._current is None:
+            raise StopIteration()
+        else:
+            answer = self._current
+            self._advance()
+            return answer
+    
+    def __iter__(self):
+        """By convention, an iterator must return itself as an iterator."""
+        return self
+    
+    def print_progression(self, n):
+        """Print next n values of the progression."""
+        print(' '.join(str(next(self)) for j in range(n)))
+```
+
+
+```python
+class ArithmeticProgression(Progression):
+    """Iterator producing an arithmetic progression."""
+    
+    def __init__(self, increment=1, start=0):
+        """Create a new arithmetic progression.
+        
+        increment       the fixed constant to add to each term(default 1)
+        start           the first term of the progression(default 0)
+        """
+        super().__init__(start)
+        self._increment = increment
+        
+    def _advance(self):
+        self._current += self._increment
+```
+
+
+```python
+class GeometricProgression(Progression):
+    def __init__(self, base=2, start=1):
+        """
+        base      the fixed constant multiplied to each term(default 2)
+        start     the first term of the progress(default 1)
+        """
+        super().__init__(start)
+        self._base = base
+        
+    def _advance(self):
+        self._current *= self._base
+```
+
+
+```python
+class FibonacciProgression(Progression):
+    def __init__(self, first=0, second=1):
+        super().__init__(first)
+        self._prev = second - first  # fictitious value preceding the first
+    
+    def _advance(self):
+        self._prev, self._current = self._current, self._prev + self._current  # here is why not just set _prev to a causal value.
+        # self._prev = second - first is useful when poping the second element.
+```
+
+In OOP, __abstract base class__ is only for serving as a base class through inheritance and it can not be directly instantiated. While __concret class__ is one that can be instantiated. So our Progression class is technically concrete but we essentially designed it as an ABC.  
+In statically typed language like C++, an ABC serves as a formal type that may guarantee one or more __abstract methods__. This provides support for __polymorphism__, _as a variable may have an ABC as its declared type, even though it refers to an instance of a concrete subclass_.  
+
+Although python has no declared type and there is no strong tradition of defining ABCs in python, but Python's collections module provides several ABCs that are useful when we want to define custom data structure that share common interface with built-in data structures.  
+
+These rely on __template method pattern__. This design pattern is when an ABC provides concrete behaviors that rely upon calls to other abstract behaviors. As soon as a subclass of this ABC provides definitions for the missing abstract behaviors, the inherited concrete behaviors are well defined.  
+
+Eg., the collections.Sequence ABC defines behaviors common to python's list, str, and tuple, as sequences that support element access via an integer index(so the `__getitem__ and __len__`method are abstract methods in this ABC). This ABC provides concrete implementation of methods, count, index, and `__contains__` that can be inherited by any class that provides concrete implementations of both `__len__ and __getitem__`.
+
+
+```python
+from abc import ABCMeta, abstractmethod
+class Sequence(metaclass=ABCMeta):
+    """Our own version of collections.Sequence abstract base class."""
+    @abstractmethod
+    def __len__(self):
+        """Return the length of the sequence."""
+    
+    @abstractmethod
+    def __getitem__(self, j):
+        """Return the element at index j of the sequence."""
+        
+    def __contains__(self, j):
+        """Return True if val found in the sequence."""
+        for j in range(len(self)):
+            if self[j] == val:
+                return True
+        return False
+    
+    def index(self, val):
+        """Return leftmost index at which val is found"""
+        for j in range(len(self)):
+            if self[j] == val:
+                return j
+        raise ValueError('value not found.')
+        
+    def count(self, val):
+        """Return the number of elements equal to given value."""
+        k = 0
+        for j in range(len(self)):
+            if self[j] == val:
+                k += 1
+        return k
+```

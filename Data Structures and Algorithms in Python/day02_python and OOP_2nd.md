@@ -1,21 +1,17 @@
-#!/usr/bin/env python
-# coding: utf-8
+Python is __Dynamically typed__ language, there is no advance declaration associating an indentifier with a particular data type. An identifier can be associated with any type of object(or reassigned to another object of different type). C++ use type to allocate memory for an identifier, this can save space and be more efficient.  
+Q1: _But in python, everything is object, how this dynamic memory allocation is implemented? and how to make it as efficient as possible. How the interpreter do the dirty work for us, like determine how much space for a "3.26" we passed in? And what is the difference between python obj construct and the heap memory for (new obj) in C++._   
+_Guess: The memory is determined by the right operand of an assigment, the identifier(left operand) contains the start and end memory address of the right operand. Not like C++ (only the starting address)._ 
 
-# Python is __Dynamically typed__ language, there is no advance declaration associating an indentifier with a particular data type. An identifier can be associated with any type of object(or reassigned to another object of different type). C++ use type to allocate memory for an identifier, this can save space and be more efficient.  
-# Q1: _But in python, everything is object, how this dynamic memory allocation is implemented? and how to make it as efficient as possible. How the interpreter do the dirty work for us, like determine how much space for a "3.26" we passed in? And what is the difference between python obj construct and the heap memory for (new obj) in C++._   
-# _Guess: The memory is determined by the right operand of an assigment, the identifier(left operand) contains the start and end memory address of the right operand. Not like C++ (only the starting address)._ 
-# 
-# List, set, dict are mutable bulit-in classes, but there are some subtles in the low-level implementation.  
-# Q2: _what data structure concepts are used in the C level for these built-in container? Why should the key of a dict keep immutable?_  
-# 
-# Bitwise Operators:  
-# 1.~ bitwise complement(prefix unary operator)  
-# 2.& biwise and; | bitwise or; ^ bitwise exclusive-or;  
-# 3.<< shift bits left, filling in with zeros; >> shift bits right, filling in with sign bit  
+List, set, dict are mutable bulit-in classes, but there are some subtles in the low-level implementation.  
+Q2: _what data structure concepts are used in the C level for these built-in container? Why should the key of a dict keep immutable?_  
 
-# In[ ]:
+Bitwise Operators:  
+1.~ bitwise complement(prefix unary operator)  
+2.& biwise and; | bitwise or; ^ bitwise exclusive-or;  
+3.<< shift bits left, filling in with zeros; >> shift bits right, filling in with sign bit  
 
 
+```python
 def sqrt(x):
     if not isinstance(x, (int, float)):
         raise TypeError('x must be numeric')
@@ -35,19 +31,18 @@ while age <= 0:
         raise
     finally:
         print('This sentence will always come up')
+```
+
+An Iterable obj means this obj can produce an iterator via `iter(obj)`.  
+Iterator is an obj that manages an iteration and we can use bulit-in function `next(i)` to produce a subsequent element, with a StopIteration exception raised when there is no more element.  
+eg: li = [1,2,3,4], list is iterable but we can not call `next(li)` directly, we can use `i = iter(li)` to get a iterator first, then call `next(i)` to get element in the list one by one.  
+Iterator does not store its owen copy of the list of elements, it keeps a current index into the original list.  
+
+Generator is one simple way of making iterators, its syntax is similar to a function, but ues `yield` to replace `return`.  
+like the following code, we can use `for factor in factors(100)` to loop this iterable obj.
 
 
-# An Iterable obj means this obj can produce an iterator via `iter(obj)`.  
-# Iterator is an obj that manages an iteration and we can use bulit-in function `next(i)` to produce a subsequent element, with a StopIteration exception raised when there is no more element.  
-# eg: li = [1,2,3,4], list is iterable but we can not call `next(li)` directly, we can use `i = iter(li)` to get a iterator first, then call `next(i)` to get element in the list one by one.  
-# Iterator does not store its owen copy of the list of elements, it keeps a current index into the original list.  
-# 
-# Generator is one simple way of making iterators, its syntax is similar to a function, but ues `yield` to replace `return`.  
-# like the following code, we can use `for factor in factors(100)` to loop this iterable obj.
-
-# In[ ]:
-
-
+```python
 def factors(n):
     print('normal factor function is called')
     for k in range(1, n+1):
@@ -89,14 +84,13 @@ def fibonacci():
 { k*k for k in range(1, n+1) } # set comprehension
 ( k*k for k in range(1, n+1) ) # generator comprehension
 { k : k*k for k in range(1, n+1) } # dictionary comprehension
+```
+
+use dir() and vars() to get the most locally enclosing namespace in which they are executed.  
+_First class obj_ : instances of a type that can be _assigned to an identifier, passed as a parameter, or returned by a function_. 
 
 
-# use dir() and vars() to get the most locally enclosing namespace in which they are executed.  
-# _First class obj_ : instances of a type that can be _assigned to an identifier, passed as a parameter, or returned by a function_. 
-
-# In[ ]:
-
-
+```python
 # a demo for Scope of python function
 
 p1, p2 = "yeye","nainai"
@@ -130,16 +124,15 @@ def outer():
     print("-----by outer--------")
 
 globalfun()
+```
+
+Software development  
+__Responsibilities__(divide the work into different actors, use action verbs to describe responsibilities);
+__Independence__;
+__Behaviors__  
 
 
-# Software development  
-# __Responsibilities__(divide the work into different actors, use action verbs to describe responsibilities);
-# __Independence__;
-# __Behaviors__  
-
-# In[49]:
-
-
+```python
 class CreditCard:
     """A consumer credit card."""
     def __init__(self, customer, bank, acnt, limit):
@@ -177,26 +170,25 @@ class CreditCard:
             return True
     def make_payment(self, amount):
         self._balance -= amount
+```
+
+Operator Overloading: by default, the + is undefined for a new class, but we can provide a definition of + for this class.  
+Providing `__add__` and `__mul__` in our new class to define its behavior.  
+Non-Operator Overloads: i is an instance of our new class, if we want to present it in string like we did in `str(9)`(the str representation of a number). we will use `str(i)`, but by default this builit-in func doesn't support our new class. So we can define `__str__()` in our class. `__bool__` is similar.  
+
+### Implied Methods  
+Q1: How these implied methods implemented?   
+Guess: define concrete method(rely on abstract method) in the ABC, then implement the abstract method in subclass. So if we define a new class with several special method defined, then the concrete method in ABC inherited by our new class would automatically be supported.  
+
+`__bool__` method supports `if foo:`, has default semantic, every obj other than None is evaluated as True. But for container types, if `__len__` is supported in the container, then `bool(container)` is to be True when the container instance is nonzero length.  
+
+`__iter__` can provide iterators for collections. But for container class, if `__len__` and `__getitem__` are implemented, then a default iteration is provided. And once an iterator is defined, then `__contains__` is provided.  
+If `__eq__` is not defined in a new class, then `a==b` will be evaluated as `a is b`.  
+
+__polymorphism__ in python: if we use `u = v + [1,2,3]`, it would result in the element-by-element sum of the Vector and the list. This polymorphism is subtle compared with C++.
 
 
-# Operator Overloading: by default, the + is undefined for a new class, but we can provide a definition of + for this class.  
-# Providing `__add__` and `__mul__` in our new class to define its behavior.  
-# Non-Operator Overloads: i is an instance of our new class, if we want to present it in string like we did in `str(9)`(the str representation of a number). we will use `str(i)`, but by default this builit-in func doesn't support our new class. So we can define `__str__()` in our class. `__bool__` is similar.  
-# 
-# ### Implied Methods  
-# Q1: How these implied methods implemented?   
-# Guess: define concrete method(rely on abstract method) in the ABC, then implement the abstract method in subclass. So if we define a new class with several special method defined, then the concrete method in ABC inherited by our new class would automatically be supported.  
-# 
-# `__bool__` method supports `if foo:`, has default semantic, every obj other than None is evaluated as True. But for container types, if `__len__` is supported in the container, then `bool(container)` is to be True when the container instance is nonzero length.  
-# 
-# `__iter__` can provide iterators for collections. But for container class, if `__len__` and `__getitem__` are implemented, then a default iteration is provided. And once an iterator is defined, then `__contains__` is provided.  
-# If `__eq__` is not defined in a new class, then `a==b` will be evaluated as `a is b`.  
-# 
-# __polymorphism__ in python: if we use `u = v + [1,2,3]`, it would result in the element-by-element sum of the Vector and the list. This polymorphism is subtle compared with C++.
-
-# In[43]:
-
-
+```python
 class Vector:
     def __init__(self, d):
         self._coords = [0] * d
@@ -228,11 +220,10 @@ class Vector:
     
     def __str__(self):
         return '<' + str(self._coords)[1:-1] + '>'
+```
 
 
-# In[ ]:
-
-
+```python
 class SequenceIterator:
     """An iterator for any of Python's sequence types."""
     def __init__(self, sequence):
@@ -251,11 +242,10 @@ class SequenceIterator:
     def __iter__(self):
         """By convention, an iterator must return itself as an iterator."""
         return self
+```
 
 
-# In[ ]:
-
-
+```python
 class Range:
     """A class that mimics the built-in range class."""
     def __init__(self, start, stop=None, step=1):
@@ -278,11 +268,10 @@ class Range:
             raise IndexError('index out of range')
         return self._start + k*self._step
 Range(10)[9]
+```
 
 
-# In[50]:
-
-
+```python
 class PredatoryCreditCard(CreditCard):
     def __init__(self, customer, bank, acnt, limit, apr):
         super().__init__(customer, bank, acnt, limit)
@@ -300,11 +289,10 @@ class PredatoryCreditCard(CreditCard):
 # this subclass would rely on the _balance, single underscore means protected(double underscore means private) 
 # and can be access by subclass, the superclass may change, so it is better to define a nonpublic method in the superclass
 # like _set_balance.
+```
 
 
-# In[53]:
-
-
+```python
 class Progression:
     """Iterator producing a generic progression.
     Default iterator produces the whole numbers 0,1,2,...
@@ -360,14 +348,13 @@ class FibonacciProgression(Progression):
         
     def _advance(self):
         self._prev, self._current = self._current, self._prev + self._current
+```
+
+__Template method pattern__ is when an ABC provides concrete behaviors that rely upon calls to other abstract behaviors. In that way, as soon as a subclass provides definitions for the missing abstract behaviors, the inherited concrete behaviors are well defined.  
+collections.Sequence class provides concrete implementations of methods, `count, index, __contains__` that can be inherited by any class that provides concrete implementations of both `__len__ and __getitem__`.
 
 
-# __Template method pattern__ is when an ABC provides concrete behaviors that rely upon calls to other abstract behaviors. In that way, as soon as a subclass provides definitions for the missing abstract behaviors, the inherited concrete behaviors are well defined.  
-# collections.Sequence class provides concrete implementations of methods, `count, index, __contains__` that can be inherited by any class that provides concrete implementations of both `__len__ and __getitem__`.
-
-# In[54]:
-
-
+```python
 # demo for template method pattern
 
 from abc import ABCMeta, abstractmethod
@@ -400,11 +387,10 @@ class Sequence(metaclass = ABCMeta):
             if self[j] == val:
                 k += 1
         return k
+```
 
 
-# In[ ]:
-
-
+```python
 # demo for deep copy and shallow copy
 
 import copy
@@ -424,4 +410,4 @@ new2 = copy.deepcopy(orgin)
 new2[0][1] = 'a'
 print(orgin)    
 print(new2)
-
+```
